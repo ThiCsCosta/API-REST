@@ -1,4 +1,5 @@
 import express, { Router } from 'express';  // <-- import express
+import { SlowBuffer } from 'node:buffer';
 const app = express(); // <-- criar uma instancia do express
 import * as fs from 'node:fs';
 
@@ -21,29 +22,47 @@ const writeFile = (content) =>{
     const updateFile = JSON.stringify(content)
     fs.writeFileSync('./db/db.json', updateFile, 'utf-8')
 }
+
+// criando rota padrão ou raiz
+//Lendo
+app.get('/', (req, res) => {
+    res.send(readFile())
+})
+//Criando
 app.post('/', (req, res) => {
-    const {id, selecao, grupo} = req.body
     const currentContent =  readFile()
+    const {selecao, grupo} = req.body
+    const id = Math.random().toString(32).substring(2, 9)
     currentContent.push({id, selecao, grupo})
     writeFile(currentContent)
     res.send({id, selecao, grupo})
 })
-// criando rota padrão ou raiz
-app.get('/', (req, res) => {
-    res.send(readFile())
+// Atualizando 
+app.put('/:id', (req, res) => {
+    const {id} = req.params
+    const {selecao, grupo} = req.body
+    const currentContent  = readFile()
+    const selectedSelecao = currentContent.findIndex((item) => item.id === id)
+    const {id: cId, selecao: cSelecao, grupo: cGrupo} = currentContent[selectedSelecao]
+
+    const newObject = {
+        id: cId,
+        selecao: selecao ? selecao: cSelecao,
+        grupo: grupo ? grupo: cGrupo
+    }
+    currentContent[selectedSelecao] = newObject
+    writeFile(currentContent)
+    res.send(newObject)
 })
 
-app.get('/selecoes', (req, res)=>{
-    res.send(readFile())
-})
-app.get('/test', (req, res)=>{
-    res.status(400).send('<h1>Não é possível acessar esse site</h1>')
-})
-
-// Rota criado para postar dados
-app.post('/selecoes',  (req, res)=>{
-    selecoes.push(req.body)
-    res.status(200).send('Seleção cadastrada com sucesso!')
+// Deletando
+app.delete('/:id',  (req, res)=> {
+    const {id} = req.params
+    const currentContent = readFile()
+    const selectedSelecao = currentContent.findIndex((item) => item.id === id)
+    currentContent.splice(selectedSelecao, 1)
+    writeFile(currentContent)
+    res.send('Aqruivo deletado com sucesso!')
 })
 export default app // <-- exportando app
 
