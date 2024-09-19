@@ -2,6 +2,7 @@ import express, { Router } from 'express';  // <-- import express
 import { SlowBuffer } from 'node:buffer';
 const app = express(); // <-- criar uma instancia do express
 import * as fs from 'node:fs';
+let numeroRandom = 10000;
 
 app.use(express.json({extended: true})) // <-- indica para o express ler arquivos JSON
 app.use((req, res, next) =>{
@@ -23,16 +24,30 @@ const writeFile = (content) =>{
     fs.writeFileSync('./db/db.json', updateFile, 'utf-8')
 }
 
+//Retorna todos os elementos
+const seacherId = readFile()
+function seachId(id){
+    return seacherId.filter(seacherId => seacherId.id == id)
+}
+
+//Buscar a posição do elemento do index no array
+function buscarFilterIndex(id){
+    return seacherId.findIndex(seacherId => seacherId.id == id)
+}
 // criando rota padrão ou raiz
 //Lendo
 app.get('/', (req, res) => {
     res.send(readFile())
 })
+// Busca por id
+app.get('/:id', (req, res) =>{
+    res.json(seachId(req.params.id))
+})
 //Criando
 app.post('/', (req, res) => {
     const currentContent =  readFile()
     const {selecao, grupo} = req.body
-    const id = Math.random().toString(32).substring(2, 9)
+    const id = parseInt(Math.random() * numeroRandom + 2)
     currentContent.push({id, selecao, grupo})
     writeFile(currentContent)
     res.send({id, selecao, grupo})
@@ -54,15 +69,21 @@ app.put('/:id', (req, res) => {
     writeFile(currentContent)
     res.send(newObject)
 })
-
+/*
+app.delete('/:id', (req, res) => {
+    const index = buscarFilterIndex(req.params.id)
+    readFile().splice(index, 1)
+    res.send(`Index id: ${req.params.id} excluida com sucesso!`)
+}) */
 // Deletando
+
 app.delete('/:id',  (req, res)=> {
-    const {id} = req.params
-    const currentContent = readFile()
-    const selectedSelecao = currentContent.findIndex((item) => item.id === id)
-    currentContent.splice(selectedSelecao, 1)
-    writeFile(currentContent)
+    const index = buscarFilterIndex(req.params.id)
+    const currentContent = seacherId
+    currentContent.splice(index, 1)
     res.send('Aqruivo deletado com sucesso!')
 })
+
+
 export default app // <-- exportando app
 
