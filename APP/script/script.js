@@ -24,13 +24,15 @@ function criarLinha(lista){
 function indice(){
     let listas = fazGet("http://localhost:3000/")
     let listaSelecoes = JSON.parse(listas)
-    
 
+    const chavesOrdenadas = listaSelecoes.sort((a, b) => a.selecao.localeCompare(b.selecao)) //Ordenação
+    
     let tabela = document.getElementById("tabela")
-    listaSelecoes.forEach(element => {
-        let linhas = criarLinha(element)
+    chavesOrdenadas.forEach(element => {
+        let linha = criarLinha(element)
         tabela.appendChild(linha)
     });
+    
 }
 
 indice()
