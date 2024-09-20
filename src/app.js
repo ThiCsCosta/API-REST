@@ -2,7 +2,13 @@ import express, { Router } from 'express';  // <-- import express
 import { SlowBuffer } from 'node:buffer';
 const app = express(); // <-- criar uma instancia do express
 import * as fs from 'node:fs';
-let numeroRandom = 10000;
+
+
+function numberRandom(){
+    const generateNumbersRandom = 1000
+    const number = parseInt(Math.random() * generateNumbersRandom + 1)
+    return number
+}
 
 app.use(express.json({extended: true})) // <-- indica para o express ler arquivos JSON
 app.use((req, res, next) =>{
@@ -47,7 +53,7 @@ app.get('/:id', (req, res) =>{
 app.post('/', (req, res) => {
     const currentContent =  readFile()
     const {selecao, grupo} = req.body
-    const id = parseInt(Math.random() * numeroRandom + 2)
+    const id = numberRandom()
     currentContent.push({id, selecao, grupo})
     writeFile(currentContent)
     res.send({id, selecao, grupo})
@@ -57,7 +63,7 @@ app.put('/:id', (req, res) => {
     const {id} = req.params
     const {selecao, grupo} = req.body
     const currentContent  = readFile()
-    const selectedSelecao = currentContent.findIndex((item) => item.id === id)
+    const selectedSelecao = currentContent.findIndex((item) => item.id == id)
     const {id: cId, selecao: cSelecao, grupo: cGrupo} = currentContent[selectedSelecao]
 
     const newObject = {
@@ -69,18 +75,19 @@ app.put('/:id', (req, res) => {
     writeFile(currentContent)
     res.send(newObject)
 })
-/*
-app.delete('/:id', (req, res) => {
-    const index = buscarFilterIndex(req.params.id)
-    readFile().splice(index, 1)
-    res.send(`Index id: ${req.params.id} excluida com sucesso!`)
-}) */
+
+// app.delete('/:id', (req, res) => {
+//     const index = buscarFilterIndex(req.params.id)
+//     .splice(index, 1)
+//     res.send(`Index id: ${req.params.id} excluida com sucesso!`)
+// }) 
 // Deletando
 
 app.delete('/:id',  (req, res)=> {
     const index = buscarFilterIndex(req.params.id)
-    const currentContent = seacherId
+    const currentContent = readFile()
     currentContent.splice(index, 1)
+    writeFile(currentContent)
     res.send('Aqruivo deletado com sucesso!')
 })
 
